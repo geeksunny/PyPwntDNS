@@ -1,0 +1,35 @@
+{
+  "api": {
+    "api_key": "abcdefg1234567",
+    "user_id": "12345"
+  },
+  "domains": {
+    "example.com": {
+      "A": [
+        {
+          "name": "",
+          "ttl": 86400,
+          "priority": null
+        },
+        {
+          "name": "www"
+        }
+      ],
+      "CNAME": [
+        {
+          "name": "sample"
+        }
+      ]
+    },
+    "sample.net": [
+      "A": [
+        {
+          "name": "",
+        },
+        {
+          "name": "www"
+        }
+      ]
+    ]
+  }
+}
