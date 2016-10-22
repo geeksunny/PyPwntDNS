@@ -1,7 +1,6 @@
 class ApiResponse(object):
-    statusCode = 0
-    body = {}
-    #
-    def __init__(self, statusCode, body):
-        self.statusCode = statusCode
+
+    #####
+    def __init__(self, status_code, body):
+        self.statusCode = status_code
         self.body = body

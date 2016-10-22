@@ -1,78 +1,84 @@
 from dnsimple import Dnsimple
 
+
 class DomainRecordUpdater(object):
-    dnsimple = None
-    domainConfigs = None
-    ipAddress = None
-    #
-    def __init__(self, ipAddress, pwntConfig):
-        self.dnsimple = Dnsimple(pwntConfig['api']['api_key'], pwntConfig['api']['user_id'])
-        self.domainConfigs = pwntConfig['domains']
-        self.ipAddress = ipAddress
-    #
+
+    #####
+    def __init__(self, ip_address, pwnt_config):
+        self.dnsimple = Dnsimple(pwnt_config['api']['api_key'], pwnt_config['api']['user_id'])
+        self.domain_configs = pwnt_config['domains']
+        self.ip_address = ip_address
+
+    #####
     def run(self):
-        for domain, typedRecords in self.domainConfigs['domains'].iteritems():
-            domainIsReady = self.verifyDomain(domain)
-            if (domainIsReady):
-                self.reviewZoneRecords(domain, typedRecords)
+        for domain, typed_records in self.domain_configs['domains'].iteritems():
+            domain_is_ready = self.verify_domain(domain)
+            if domain_is_ready:
+                self.review_zone_records(domain, typed_records)
             else:
                 print('Domain {} is not ready!'.format(domain))
-    #
-    def createZoneRecord(self, zoneName, recordType, recordInfo):
+
+    #####
+    def create_zone_record(self, zone_name, record_type, record_info):
         ttl = None
-        if 'ttl' in recordInfo:
-            ttl = recordInfo['ttl']
+        if 'ttl' in record_info:
+            ttl = record_info['ttl']
         priority = None
-        if 'priority' in recordInfo:
-            priority = recordInfo['priority']
-        resp = self.dnsimple.createZoneRecord(zoneName, name=recordInfo['name'], type=recordType,
-                                              content=recordInfo['content'], ttl=ttl, priority=priority)
-        return resp.statusCode == 201
-    #
-    def updateZoneRecord(self, zoneName, zoneRecordId):
-        resp = self.dnsimple.updateZoneRecord(zoneName, zoneRecordId, content=self.ipAddress)
-        return resp.statusCode == 200
-    #
-    def createDomain(self, domainName):
-        print('Creating domain record for zone {}.'.format(domainName))
-        resp = self.dnsimple.createDomain(domainName)
-        return resp.statusCode == 201
-    #
-    def verifyDomain(self, domainName):
-        print('Checking if zone {} exists.'.format(domainName))
-        resp = self.dnsimple.getDomain(domainName)
-        return resp.statusCode == 200 or self.createDomain(domainName)
-    #
-    def getRecordsForZone(self, zoneName):
-        recordMap = {}
-        resp = self.dnsimple.getZoneRecords(zoneName)
-        if resp.statusCode == 200:
+        if 'priority' in record_info:
+            priority = record_info['priority']
+        resp = self.dnsimple.create_zone_record(zone_name, name=record_info['name'], type=record_type,
+                                                content=record_info['content'], ttl=ttl, priority=priority)
+        return resp.status_code == 201
+
+    #####
+    def update_zone_record(self, zone_name, zone_record_id):
+        resp = self.dnsimple.update_zone_record(zone_name, zone_record_id, content=self.ip_address)
+        return resp.status_code == 200
+
+    #####
+    def create_domain(self, domain_name):
+        print('Creating domain record for zone {}.'.format(domain_name))
+        resp = self.dnsimple.create_domain(domain_name)
+        return resp.status_code == 201
+
+    #####
+    def verify_domain(self, domain_name):
+        print('Checking if zone {} exists.'.format(domain_name))
+        resp = self.dnsimple.get_domain(domain_name)
+        return resp.status_code == 200 or self.create_domain(domain_name)
+
+    #####
+    def get_records_for_zone(self, zone_name):
+        record_map = {}
+        resp = self.dnsimple.get_zone_records(zone_name)
+        if resp.status_code == 200:
             for record in resp.body['data']:
-                if record['type'] not in recordMap:
-                   recordMap[record['type']] = {}
-                recordMap[record['type']][record['name']] = record
-        return recordMap
-    #
-    def reviewZoneRecords(self, zoneName, typedRecords):
-        remoteRecordMap = self.getRecordsForZone(zoneName)
-        print('Reviewing zone records for {}.'.format(zoneName))
-        for type, zoneRecords in typedRecords.iteritems():
+                if record['type'] not in record_map:
+                    record_map[record['type']] = {}
+                record_map[record['type']][record['name']] = record
+        return record_map
+
+    #####
+    def review_zone_records(self, zone_name, typed_record):
+        remote_record_map = self.get_records_for_zone(zone_name)
+        print('Reviewing zone records for {}.'.format(zone_name))
+        for type, zone_records in typed_record.iteritems():
             print('Reviewing records for type {}.'.format(type))
-            remoteRecords = {}
-            if type in remoteRecordMap:
-                remoteRecords = remoteRecordMap[type]
-            for zoneRecord in zoneRecords:
-                if zoneRecord['name'] in remoteRecords:
-                    remoteRecord = remoteRecords[zoneRecord['name']]
-                    if remoteRecord['content'] != self.ipAddress:
+            remote_records = {}
+            if type in remote_record_map:
+                remote_records = remote_record_map[type]
+            for zoneRecord in zone_records:
+                if zoneRecord['name'] in remote_records:
+                    remote_record = remote_records[zoneRecord['name']]
+                    if remote_record['content'] != self.ip_address:
                         print('Updating record for "{}".'.format(zoneRecord['name']))
-                        result = self.updateZoneRecord(zoneName, remoteRecord['id'])
+                        result = self.update_zone_record(zone_name, remote_record['id'])
                         print(' Success > {}.'.format(result))
                     else:
                         print('"{}" is already up to date!'.format(zoneRecord['name']))
                     pass
                 else:
                     print('Creating record for "{}".'.format(zoneRecord['name']))
-                    result = self.createZoneRecord(type, zoneRecord)
+                    result = self.create_zone_record(type, zoneRecord)
                     print(' Success > {}.'.format(result))
                     pass
