@@ -11,7 +11,7 @@ class DomainRecordUpdater(object):
 
     #####
     def run(self):
-        for domain, typed_records in self.domain_configs['domains'].iteritems():
+        for domain, typed_records in self.domain_configs.iteritems():
             domain_is_ready = self.verify_domain(domain)
             if domain_is_ready:
                 self.review_zone_records(domain, typed_records)

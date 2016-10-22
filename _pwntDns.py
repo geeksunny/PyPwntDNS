@@ -17,6 +17,6 @@ with open('config.json') as configFile:
     config = json.load(configFile)
 if config is None:
     exit(-1)
-ipAddress = get_ip_address()
-updater = DomainRecordUpdater(ipAddress, config)
+ip_address = get_ip_address()
+updater = DomainRecordUpdater(ip_address, config)
 updater.run()
