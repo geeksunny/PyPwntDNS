@@ -4,8 +4,8 @@ from dnsimple import Dnsimple
 class DomainRecordUpdater(object):
 
     #####
-    def __init__(self, ip_address, pwnt_config):
-        self.dnsimple = Dnsimple(pwnt_config['api']['api_key'], pwnt_config['api']['user_id'])
+    def __init__(self, ip_address, pwnt_config, cert=None):
+        self.dnsimple = Dnsimple(pwnt_config['api']['api_key'], pwnt_config['api']['user_id'], cert)
         self.domain_configs = pwnt_config['domains']
         self.ip_address = ip_address
 

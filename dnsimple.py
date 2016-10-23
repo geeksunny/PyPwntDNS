@@ -1,4 +1,5 @@
 import requests
+
 from response import ApiResponse
 
 
@@ -6,9 +7,10 @@ from response import ApiResponse
 class Dnsimple(object):
 
     #####
-    def __init__(self, api_key, user_id):
+    def __init__(self, api_key, user_id, cert=None):
         self.apiKey = api_key
         self.userId = user_id
+        self.cert = cert
         self.headers = {
             "Accept": "application/json",
             "content-Type": "application/json",
@@ -26,22 +28,22 @@ class Dnsimple(object):
 
     #####
     def _get(self, url):
-        resp = requests.get(url, headers=self.headers)
+        resp = requests.get(url, headers=self.headers, verify=self.cert)
         return self._return(resp)
 
     #####
     def _post(self, url, body):
-        resp = requests.post(url, data=body, headers=self.headers)
+        resp = requests.post(url, json=body, headers=self.headers, verify=self.cert)
         return self._return(resp)
 
     #####
     def _patch(self, url, body):
-        resp = requests.patch(url, data=body, headers=self.headers)
+        resp = requests.patch(url, json=body, headers=self.headers, verify=self.cert)
         return self._return(resp)
 
     #####
     def _delete(self, url):
-        resp = requests.delete(url, headers=self.headers)
+        resp = requests.delete(url, headers=self.headers, verify=self.cert)
         return self._return(resp)
 
     #####
